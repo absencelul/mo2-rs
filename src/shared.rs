@@ -1,7 +1,5 @@
 use crate::sdk::engine::UWorld;
-use std::sync::Mutex;
-#[macro_use]
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
 use crate::sdk::G_WORLD;
 
@@ -23,6 +21,4 @@ impl Default for SharedData {
     }
 }
 
-lazy_static! {
-    pub static ref SHARED_DATA: Mutex<SharedData> = Mutex::new(SharedData::default());
-}
+pub static SHARED_DATA: LazyLock<SharedData> = LazyLock::new(|| SharedData::default());

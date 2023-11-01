@@ -1,4 +1,7 @@
+#![feature(lazy_cell)]
+
 use std::ffi::c_void;
+use std::sync::atomic::{AtomicBool, Ordering};
 use windows::Win32::Foundation::{BOOL, HINSTANCE};
 use windows::Win32::System::SystemServices::{
     DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH, DLL_THREAD_ATTACH, DLL_THREAD_DETACH,
@@ -7,15 +10,15 @@ use windows::Win32::UI::Input::KeyboardAndMouse::VK_END;
 
 use crate::hooks::{initialize_hooks, unhook_all};
 
-mod constants;
 mod cc;
+mod constants;
 mod gui;
 mod hooks;
 mod sdk;
 mod shared;
 mod utils;
 
-static mut EXITING: bool = false;
+static EXITING: AtomicBool = AtomicBool::new(false);
 
 #[no_mangle]
 extern "stdcall" fn DllMain(hinstance: HINSTANCE, reason: u32, _reserved: *mut c_void) -> BOOL {
@@ -38,9 +41,7 @@ extern "stdcall" fn DllMain(hinstance: HINSTANCE, reason: u32, _reserved: *mut c
 
 fn on_loop() {
     if utils::key_released(VK_END.0) {
-        unsafe {
-            EXITING = true;
-        };
+        EXITING.store(true, Ordering::Relaxed);
         utils::unload();
     }
 }
@@ -57,8 +58,7 @@ fn main_thread(_hinstance: HINSTANCE) {
     println!("[-] successfully loaded mo2_rs.dll");
 
     unsafe {
-        #[allow(clippy::empty_loop)]
-        while !EXITING {
+        while !EXITING.load(Ordering::SeqCst) {
             on_loop();
         }
     }

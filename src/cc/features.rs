@@ -1,8 +1,10 @@
 use std::any::Any;
 
-pub mod esp_feature;
+pub mod aim;
+pub mod esp;
 
 pub trait Feature: Send + Sync {
-    fn condition(&self, object: &dyn Any) -> bool;
+    fn before_execute(&self);
     fn execute(&self, object: &dyn Any);
+    fn after_execute(&self);
 }

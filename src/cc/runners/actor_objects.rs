@@ -2,17 +2,24 @@ use crate::cc::features::Feature;
 use crate::cc::runners::Runner;
 use crate::shared::SHARED_DATA;
 
-pub struct LevelObjectsRunner;
+pub struct ActorObjectsRunner {
+    features: Vec<Box<dyn Feature>>,
+}
 
-impl Runner for LevelObjectsRunner {
+impl ActorObjectsRunner {
+    pub fn new(features: Vec<Box<dyn Feature>>) -> Self {
+        Self { features }
+    }
+}
+
+impl Runner for ActorObjectsRunner {
     fn condition(&self) -> bool {
-        let data = SHARED_DATA.lock().unwrap();
-        if data.g.is_none() {
+        if SHARED_DATA.g.is_none() {
             println!("LevelObjectsRunner::condition: g_world is None");
             return false;
         }
 
-        if data.g.unwrap().is_null() {
+        if SHARED_DATA.g.unwrap().is_null() {
             println!("LevelObjectsRunner::condition: g_world is null");
             return false;
         }
@@ -20,12 +27,10 @@ impl Runner for LevelObjectsRunner {
         true
     }
 
-    fn on_execute(&self, features: &[Box<dyn Feature>]) {
+    fn on_execute(&self) {
         println!("LevelObjectsRunner::on_execute");
 
-        let data = SHARED_DATA.lock().unwrap();
-        let g_world = data.g.unwrap();
-        let g_world = unsafe { &*g_world };
+        let g_world = unsafe { &*(SHARED_DATA.g.unwrap()) };
         let level = (*g_world).persistent_level;
         if level.is_null() {
             println!("LevelObjectsRunner::on_execute: level is null");
@@ -34,18 +39,18 @@ impl Runner for LevelObjectsRunner {
 
         let level = unsafe { &*level };
         let actors = &(*level).actors;
-        if actors.is_empty() {
+        if actors.is_empty() || actors.data.is_null() {
             println!("LevelObjectsRunner::on_execute: actors is null or empty");
             return;
         }
 
         actors.iter().for_each(|actor| {
-            if !actor.is_null() {
-                for feature in features {
-                    if feature.condition(&actor) {
-                        feature.execute(&actor);
-                    }
-                }
+            if actor.is_null() {
+                return;
+            }
+
+            for feature in &self.features {
+                feature.execute(&actor);
             }
         });
     }

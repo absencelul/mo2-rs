@@ -1,14 +1,12 @@
-use lazy_static::lazy_static;
 use retour::static_detour;
+use std::sync::LazyLock;
 
+use crate::cc::features::{aim, esp};
+use crate::cc::runners::{actor_objects::ActorObjectsRunner, Runner};
 use crate::gui::colors;
 use crate::sdk::core::{FVector2D, UObject};
 use crate::sdk::engine::{UCanvas, UFont, UGameViewportClient};
 use crate::sdk::POST_RENDER_INDEX;
-use crate::cc::features;
-use crate::cc::features::Feature;
-use crate::cc::runners::level_objects_runner::LevelObjectsRunner;
-use crate::cc::runners::Runner;
 
 type FnPostRender =
     unsafe extern "fastcall" fn(viewport: *const UGameViewportClient, canvas: *const UCanvas);
@@ -19,16 +17,17 @@ static_detour! {
         *const UCanvas);
 }
 
-lazy_static! {
-    pub static ref FEATURES: Vec<Box<dyn Feature>> =
-        vec![Box::new(features::esp_feature::PlayerFeature)];
-    pub static ref LEVEL_RUNNER: LevelObjectsRunner = LevelObjectsRunner;
-}
+pub static ACTOR_OBJECTS_RUNNER: LazyLock<ActorObjectsRunner> = LazyLock::new(|| {
+    ActorObjectsRunner::new(vec![
+        Box::new(esp::EspFeature),
+        Box::new(aim::AimFeature),
+    ])
+});
 
 fn hk_post_render(viewport: *const UGameViewportClient, canvas: *const UCanvas) {
     unsafe {
-        if LEVEL_RUNNER.condition() {
-            LEVEL_RUNNER.on_execute(&FEATURES);
+        if ACTOR_OBJECTS_RUNNER.condition() {
+            ACTOR_OBJECTS_RUNNER.on_execute();
         }
 
         let font = UFont::get_font();

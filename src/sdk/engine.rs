@@ -247,6 +247,7 @@ pub struct UGameInstance {
  * Class Engine.BlueprintFunctionLibrary
  * Size -> 0x0000 (FullSize[0x0028] - InheritedSize[0x0028])
  */
+#[allow(unused)]
 #[repr(C)]
 pub struct UBlueprintFunctionLibrary {
     pub object_: UObject, // 0x00(0x28)
@@ -256,12 +257,14 @@ pub struct UBlueprintFunctionLibrary {
  * Class Engine.GameplayStatics
  * Size -> 0x0000 (FullSize[0x0028] - InheritedSize[0x0028])
  */
+#[allow(unused)]
 #[repr(C)]
 pub struct UGameplayStatics {
     pub blueprint_function_library_: UBlueprintFunctionLibrary, // 0x00(0x28)
 }
 
 impl UGameplayStatics {
+    #[allow(dead_code)]
     pub fn spawn_object(&self, class: *const UClass, outer: *const UObject) -> *const UObject {
         static mut FUNC: *mut UFunction = std::ptr::null_mut();
         struct SpawnObjectParams {
@@ -521,6 +524,6 @@ pub struct UFont {
 
 impl UFont {
     pub fn get_font() -> *const Self {
-        unsafe { UObject::find_object::<UFont>("Font Roboto.Roboto") }
+        UObject::find_object::<UFont>("Font Roboto.Roboto")
     }
 }

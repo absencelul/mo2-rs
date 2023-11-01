@@ -40,6 +40,7 @@ impl TUObjectArray {
         self.num_elements as usize
     }
 
+    #[allow(dead_code)]
     pub fn max(&self) -> usize {
         self.max_elements as usize
     }
@@ -78,6 +79,7 @@ pub struct TArray<T> {
 }
 
 impl<T: Clone> TArray<T> {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             data: std::ptr::null(),

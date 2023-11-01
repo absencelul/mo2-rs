@@ -75,7 +75,7 @@ impl UObject {
             unsafe {
                 while !outer.is_null() {
                     name = format!("{}.{}", (*outer).get_name(), name);
-                    outer = unsafe { (*outer).outer };
+                    outer = (*outer).outer;
                 }
             }
 
@@ -108,6 +108,7 @@ impl UObject {
         std::ptr::null()
     }
 
+    #[allow(dead_code)]
     pub fn find_objects<T: 'static>(name: &str) -> Vec<*const T> {
         let mut objects: Vec<*const T> = Vec::new();
         if let Some(g_objects) = UObject::get_global_object() {
@@ -129,10 +130,12 @@ impl UObject {
         objects
     }
 
+    #[allow(dead_code)]
     pub fn find_class(name: &str) -> *const UClass {
         UObject::find_object::<UClass>(name)
     }
 
+    #[allow(dead_code)]
     pub fn is_a(&self, cmp: &mut UClass) -> bool {
         let mut s = self.class as *mut UClass;
         while !s.is_null() {

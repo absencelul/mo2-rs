@@ -1,0 +1,29 @@
+[package]
+name = "mo2-rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"] # Compile to a dynamic library
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+retour = { version = "0.4.0-alpha.1", features = ["static-detour"] }
+parking_lot = "0.12.1"
+sdk = { path = "../crates/sdk" }
+gui = { path = "../crates/gui" }
+
+[dependencies.windows]
+version = "0.51.1"
+features = [
+    "Win32_Foundation",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_System_WindowsProgramming",
+    "Win32_System_SystemServices",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_OpenGL",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Console",
+    "Win32_Graphics_Gdi",
+]
